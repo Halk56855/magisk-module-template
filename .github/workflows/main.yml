@@ -1,0 +1,28 @@
+name: Build InstallerX Magisk Module
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Latest InstallerX APK
+        run: |
+          mkdir -p system/priv-app/PackageInstaller
+          LATEST_APK=$(curl -s https://api.github.com/repos/takagiyoshino/InstallerX/releases/latest | grep "browser_download_url" | grep -i "\.apk" | head -n 1 | cut -d '"' -f 4)
+          curl -L -o system/priv-app/PackageInstaller/PackageInstaller.apk "$LATEST_APK"
+
+      - name: Create Zip Module
+        run: |
+          zip -r InstallerX-Magisk-Module.zip . -x ".git*" ".github*" "README.md"
+
+      - name: Upload Module Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: InstallerX-Magisk-Module
+          path: InstallerX-Magisk-Module.zip
